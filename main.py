@@ -1,6 +1,11 @@
-def main():
-    print("Hello from fastapi-actuator!")
+from fastapi import FastAPI
+from app import add_actuator
 
+app = FastAPI()
 
-if __name__ == "__main__":
-    main()
+add_actuator(app)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World for the actuator app"}
+

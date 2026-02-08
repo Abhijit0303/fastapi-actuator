@@ -11,7 +11,9 @@ async def health():
 @router.get("/info")
 async def info():
     return {
-        "python_version": platform.python_version()
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "processor": platform.processor()
     }
 
 @router.get("/metrics")
