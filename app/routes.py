@@ -1,58 +1,104 @@
 import socket
-from fastapi import APIRouter
+from fastapi import APIRouter, FastAPI
 from app.core import actuator_state
 from app.system import get_system_info
 import platform
+from fastapi.routing import APIRoute
 
-router = APIRouter(prefix="/actuator")
+def get_router(app: FastAPI):
 
-#---------------------HEALTH----------------------------
+    router = APIRouter(prefix="/actuator")
 
-@router.get("/health/live")
-async def liveness():
-    return {"status": "UP"}
+    #---------------------INDEX----------------------------
 
-@router.get("/health/ready")
-async def readiness():
-    return {"status": "READY"}
+    @router.get("")
+    async def index():
+        return {
+            "endpoints": [
+                "/actuator/health/live",
+                "/actuator/health/ready",
+                "/actuator/info",
+                "/actuator/platform",
+                "/actuator/metrics",
+                "/actuator/mappings",
+            ],
+            "count": 6,
+        }
 
-#---------------------INFO----------------------------
+    #---------------------HEALTH----------------------------
 
-@router.get("/info")
-async def info():
-    return {
-        "name": actuator_state.name,
-        "version": actuator_state.version,
-        "environment": actuator_state.environment,
-        "started_at": actuator_state.started_at,
-    }
+    @router.get("/health/live")
+    async def liveness():
+        return {"status": "UP"}
 
-#---------------------PLATFORM----------------------------
+    @router.get("/health/ready")
+    async def readiness():
+        return {"status": "READY"}
 
-@router.get("/platform")
-async def platform_info():
-    return {
-        "python_version": platform.python_version(),
-        "platform": platform.platform(),
-        "system": platform.system(),
-        "release": platform.release(),
-        "hostname": socket.gethostname(),
-    }
+    #---------------------INFO----------------------------
 
-#---------------------METRICS----------------------------
+    @router.get("/info")
+    async def info():
+        return {
+            "name": actuator_state.name,
+            "version": actuator_state.version,
+            "environment": actuator_state.environment,
+            "started_at": actuator_state.started_at,
+        }
 
-@router.get("/metrics")
-async def metrics():
+    #---------------------PLATFORM----------------------------
 
-    base_metrices = {
-        "uptime_seconds": actuator_state.uptime(),
-        "total_requests": actuator_state.total_requests,
-        "in_flight_requests": actuator_state.in_flight_requests,
-        "average_latency_seconds": actuator_state.average_latency(),
-        "status_codes": actuator_state.status_codes,
-    }
+    @router.get("/platform")
+    async def platform_info():
+        return {
+            "python_version": platform.python_version(),
+            "platform": platform.platform(),
+            "system": platform.system(),
+            "release": platform.release(),
+            "hostname": socket.gethostname(),
+        }
 
-    return {
-        **base_metrices,
-        **get_system_info()
-    }
+    #---------------------METRICS----------------------------
+
+    @router.get("/metrics")
+    async def metrics():
+
+        base_metrices = {
+            "uptime_seconds": actuator_state.uptime(),
+            "total_requests": actuator_state.total_requests,
+            "in_flight_requests": actuator_state.in_flight_requests,
+            "average_latency_seconds": actuator_state.average_latency(),
+            "status_codes": actuator_state.status_codes,
+        }
+
+        return {
+            **base_metrices,
+            **get_system_info()
+        }
+
+    #---------------------MAPPINGS----------------------------
+
+    @router.get("/mappings")
+    async def mappings():
+        result = []
+
+        for route in app.routes:
+            if not isinstance(route, APIRoute):
+                continue
+
+            if route.path.startswith("/actuator") or \
+            route.path.startswith("/docs") or \
+            route.path.startswith("/openapi"):
+                continue
+
+            result.append({
+                "path": route.path,
+                "methods": list(route.methods),
+            })
+
+        return {
+            "routes": result,
+            "count": len(result),
+        }
+
+    return router
