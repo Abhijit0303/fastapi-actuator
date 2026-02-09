@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.core import actuator_state
+from app.system import get_system_info
 import platform
 
 router = APIRouter(prefix="/actuator")
@@ -18,9 +19,15 @@ async def info():
 
 @router.get("/metrics")
 async def metrics():
-    return {
+
+    base_metrices = {
         "uptime_seconds": actuator_state.uptime(),
         "total_requests": actuator_state.total_requests,
         "in_flight_requests": actuator_state.in_flight_requests,
         "average_latency_seconds": actuator_state.average_latency()
+    }
+
+    return {
+        **base_metrices,
+        **get_system_info()
     }
