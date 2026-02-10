@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue?style=flat-square)
 ![Python](https://img.shields.io/badge/python-3.12+-green?style=flat-square&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white)
-![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)
+![License](https://img.shields.io/badge/license-Apache-orange?style=flat-square)
 ![Author](https://img.shields.io/badge/author-Abhijit-purple?style=flat-square)
 
 A lightweight, production‑friendly actuator extension for FastAPI applications.
