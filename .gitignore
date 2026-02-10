@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+#Database files that for testing
+app.db

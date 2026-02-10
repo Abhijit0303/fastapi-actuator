@@ -1,6 +1,7 @@
 from datetime import datetime
 import time
 from threading import Lock
+from typing import Awaitable, Callable
 
 
 class ActuatorState:
@@ -16,6 +17,8 @@ class ActuatorState:
         self.name = "FastAPI Actuator"
         self.version = "0.0.1"
         self.environment = "development"
+
+        self.readiness_checks = {}
 
         self.lock = Lock()
 
@@ -42,3 +45,8 @@ class ActuatorState:
             return round(self.total_latency / self.total_requests, 4)
 
 actuator_state = ActuatorState()
+
+rediness_func = Callable[[], Awaitable[bool]]
+
+def register_readiness_check(name: str, func: rediness_func):
+    actuator_state.readiness_checks[name] = func

@@ -33,7 +33,26 @@ def get_router(app: FastAPI):
 
     @router.get("/health/ready")
     async def readiness():
-        return {"status": "READY"}
+        if not actuator_state.readiness_checks:
+            return {"status": "READY", "checks": {}}
+
+        results = {}
+        overall = True
+
+        for name, check in actuator_state.readiness_checks.items():
+            try:
+                result = await check()
+                results[name] = "UP" if result else "DOWN"
+                if not result:
+                    overall = False
+            except Exception as e:
+                results[name] = f"ERROR: {str(e)}"
+                overall = False
+
+        return {
+            "status": "READY" if overall else "NOT READY",
+            "checks": results,
+        }
 
     #---------------------INFO----------------------------
 

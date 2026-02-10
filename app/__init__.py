@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.routes import get_router
 from app.middleware import request_metrics_middleware
-from app.core import actuator_state
+from app.core import actuator_state, register_readiness_check
 
 def add_actuator(
         app: FastAPI,
